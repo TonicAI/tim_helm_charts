@@ -74,9 +74,11 @@ serviceAccount:
 
 rbac:
   create: true
+  installJobRoleName: "timothy-install-job"
 
 image:
-  name: "tonicai/timothy"
+  webName: "tonicai/timothy"
+  installName: "tonicai/timothy_install"
   repo: "quay.io"
   tag: "latest"
   pullPolicy: null

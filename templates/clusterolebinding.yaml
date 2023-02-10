@@ -9,6 +9,6 @@ roleRef:
   name: {{ include "timothy.fullname" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ include "timothy.fullname" . }}
+  name: {{ include "timothy.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 {{- end -}}

@@ -5,7 +5,23 @@ kind: ClusterRole
 metadata:
   name: {{ include "timothy.fullname" . }}
 rules:
-- apiGroups: ["", "extensions", "apps", "batch" ]
-  resources: ["pods", "pods/log", "deployments", "replicasets", "cronjobs", "job"]
-  verbs: ["create", "delete", "get", "list", "patch", "update"]
+- apiGroups: ["", "app", "batch", "rbac.authorization.k8s.io"]
+  resources: ["jobs", "rolebindings", "serviceaccounts", "namespaces", "secrets"]
+  verbs: ["get", "list", "create", "delete", "watch", "update"]
+- apiGroups: ["", "apps"]
+  resources: ["pods", "pods/log", "deployments", "replicasets"]
+  verbs: ["get", "list", "watch" ]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["clusterroles"]
+  verbs: ["bind"]
+  resourceNames: [ {{ include "timothy.installRole" . }} ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "timothy.installRole" . }}
+rules:
+- apiGroups: ["", "extensions", "apps" ]
+  resources: ["pods", "pods/log", "deployments", "replicasets", "secrets", "serviceaccounts"]
+  verbs: ["create", "delete", "get", "list", "watch", "patch", "update"]
 {{- end -}}

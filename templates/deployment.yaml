@@ -1,5 +1,5 @@
 {{- $volumes := .Values.volumes }}
-{{- $image := include "timothy.image" . }}
+{{- $image := include "timothy.webImage" . }}
 {{- $httpsEnabled := include "timothy.httpsEnabled" . }}
 {{- $httpEnabled := include "timothy.httpEnabled" . }}
 {{- if and (not $httpEnabled) (not $httpsEnabled) }}
@@ -74,6 +74,12 @@ spec:
             {{- /* hardcode this last since we internally depend on knowing this port number */}}
             - name: ASPNETCORE_URLS
               value: http://localhost:5000
+            - name: INSTALL_IMAGE
+              value: {{ include "timothy.installImage" . }}
+            - name: INSTALL_ROLE_NAME
+              value: {{ include "timothy.installRole" . }}
+            - name: INSTALL_IMAGE_PULL_POLICY
+              value: {{ coalesce .Values.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
           envFrom:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}

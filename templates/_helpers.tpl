@@ -24,6 +24,13 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Create the role name used for install jobs
+*/}}
+{{- define "timothy.installRole" -}}
+{{- default "timothy-install-job" .Values.rbac.installJobRoleName | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "timothy.chart" -}}
@@ -64,14 +71,27 @@ Create the name of the service account to use
 {{/*
 Creates the fully qualified image tag needed
 */}}
-{{- define "timothy.image" -}}
+{{- define "timothy.webImage" -}}
 {{- $tag :=  coalesce .Values.image.tag "latest"  -}}
 {{- $repo := coalesce .Values.global.alternativeRepository .Values.image.repo "" -}}
 {{- if $repo -}}
 {{- $repo = $repo | trimSuffix "/" -}}
-{{- printf "%s/%s:%s" $repo .Values.image.name $tag -}}
+{{- printf "%s/%s:%s" $repo .Values.image.webName $tag -}}
 {{- else -}}
-{{- printf "%s:%s" .Values.image.name $tag -}}
+{{- printf "%s:%s" .Values.image.webName $tag -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Creates base image (without tag) needed for the install job source
+*/}}
+{{- define "timothy.installImage" -}}
+{{- $repo := coalesce .Values.global.alternativeRepository .Values.image.repo "" -}}
+{{- if $repo -}}
+{{- $repo = $repo | trimSuffix "/" -}}
+{{- printf "%s/%s" $repo .Values.image.installName -}}
+{{- else -}}
+{{- printf "%s" .Values.image.installName -}}
 {{- end -}}
 {{- end }}
 
