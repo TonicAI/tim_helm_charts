@@ -1,0 +1,11 @@
+
+{{- if include "timothy.createRbac" . }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "timothy.fullname" . }}
+rules:
+- apiGroups: ["", "extensions", "apps", "batch" ]
+  resources: ["pods", "pods/log", "deployments", "replicasets", "cronjobs", "job"]
+  verbs: ["create", "delete", "get", "list", "patch", "update"]
+{{- end -}}

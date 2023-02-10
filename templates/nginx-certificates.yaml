@@ -1,0 +1,11 @@
+{{- if ( include "timothy.usingBundledCerts" . )}}
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ include "timothy.fullname" . }}-certificates
+  labels:
+    {{- include "timothy.labels" . | nindent 4 }}
+data:
+{{ (.Files.Glob "certs/*").AsSecrets | indent 2 }}
+{{- end }}

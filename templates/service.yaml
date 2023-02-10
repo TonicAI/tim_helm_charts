@@ -1,0 +1,34 @@
+{{- $httpsEnabled := include "timothy.httpsEnabled" . }}
+{{- $httpEnabled := include "timothy.httpEnabled" . }}
+{{- $service := .Values.networking.service }}
+{{- if and (not $httpEnabled) (not $httpsEnabled) }}
+{{- fail "Either http or https must be enabled, both cannot be disabled" }}
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "timothy.fullname" . }}
+  labels:
+    {{- include "timothy.labels" . | nindent 4 }}
+  annotations:
+        {{- $annotations := merge .Values.global.annotations $service.annotations }}
+        {{- if $annotations }}
+        {{- toYaml $annotations | nindent 8 }}
+        {{- end }}
+spec:
+  type: {{ default "ClusterIP" $service.type }}
+  selector:
+    {{- include "timothy.selectorLabels" . | nindent 4 }}
+  ports:
+    {{- if $httpEnabled }}
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+    {{- end -}}
+    {{- if $httpsEnabled }}
+    - port: 443
+      targetPort: https
+      protocol: TCP
+      name: https
+    {{- end -}}
