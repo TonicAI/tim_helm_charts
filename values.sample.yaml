@@ -1,0 +1,21 @@
+# This value will be provided to you by Tonic and will allow you to authenticate against our private docker repository.
+dockerConfigAuth: <docker-config-auth>
+
+# You can set this to a specific TIM version number if you wish to ensure you always get the same version. Otherwise you will always deploy the latest version.
+timVersion: latest
+
+# timdb is the postgres database that will hold information about your workspace.
+timdb:
+  host: <db-host>
+  port: 5432
+  dbName: tim
+  user: <user>
+  password: <password>
+  sslMode: Require
+
+# Container settings
+tonicai:
+  tim_server:
+    image: quay.io/tonicai/tim_server_unprivileged
+    install_job:
+      install_image_path: quay.io/tonicai/tim_install_job_unprivileged
