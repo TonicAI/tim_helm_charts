@@ -76,7 +76,7 @@ spec:
               value: http://localhost:5000
             - name: INSTALL_IMAGE
               value: {{ include "timothy.installImage" . }}
-            - name: INSTALL_ROLE_NAME
+            - name: INSTALL_JOB_ROLE_NAME
               value: {{ include "timothy.installRole" . }}
             - name: INSTALL_IMAGE_PULL_POLICY
               value: {{ coalesce .Values.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
