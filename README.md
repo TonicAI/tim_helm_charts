@@ -8,17 +8,17 @@ These are the only parameters _necessary_ to provide to install Tim.
 
 | Name | Description | Type |
 | ---- | ---- | ---- |
-| configuration.database.username | Postgres username for TIM to use | string |
-| configuration.database.password | Password for postgres user | string |
-| configuration.database.database | Postgres database name for TIM to use | string |
-| configuration.database.host | Postgres host for TIM to connect to | string |
+| web.configuration.database.username | Postgres username for TIM to use | string |
+| web.configuration.database.password | Password for postgres user | string |
+| web.configuration.database.database | Postgres database name for TIM to use | string |
+| web.configuration.database.host | Postgres host for TIM to connect to | string |
 
 Alternatively, a secret may be created with the following fields:
 
 * TIM_DB_USERNAME
 * TIM_DB_PASSWORD
 
-If such a secret is created, then `configuration.database.secretName` should be
+If such a secret is created, then `web.configuration.database.secretName` should be
 provided instead of the individual values for username and password.
 
 Additionally, either `global.tonicPullSecret` or `global.pullSecrets` may be
@@ -287,4 +287,4 @@ ingress at the HTTPS port.
 
 | Name | Description | Default | Type |
 | ---- | ---- | ---- | ---- |
-| annotations | Annotations to apply specifically to the TIM pod | {} | {string: string} |
+| web.annotations | Annotations to apply specifically to the TIM pod | {} | {string: string} |

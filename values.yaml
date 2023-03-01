@@ -103,7 +103,7 @@ networking:
     port: 8080
 
   ingress:
-    enabled: true
+    enabled: false
     className: ""
     annotations: {}
       # kubernetes.io/ingress.class: nginx
