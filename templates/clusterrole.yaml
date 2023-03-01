@@ -1,5 +1,4 @@
-
-{{- if include "timothy.createRbac" . }}
+{{- if include "timothy.createWebRbac" . }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -15,6 +14,8 @@ rules:
   resources: ["clusterroles"]
   verbs: ["bind"]
   resourceNames: [ {{ include "timothy.installRole" . }} ]
+{{- end -}}
+{{- if include "timothy.createInstallJobRbac" . }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

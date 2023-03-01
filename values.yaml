@@ -13,75 +13,79 @@ global:
   alternativeRepository: ""
   pullPolicy: "IfNotPresent"
 
-# configuration for TIM
-configuration:
-  # key value pairs that will be added directly to the deployment as
-  # environment variables
-  env: null
-    #key: value
-
-  # items in envRaw are pasted directly into the deployment in the
-  # environment section.
-  envRaw: null
-
-  # Database configuration for TIM. If secretName is provided, then that is
-  # mounted for use and nothing else in this block is considered.
-  database:
-    secretName: ""
-    username: ""
-    password: ""
-    host: ""
-    port: "5432"
-    sslMode: Prefer
-    database: ""
-
-  # The encryption key used to encrypt sensitive connection information in
-  # the TIM metadata database. If secretName is provided, then that is
-  # mounted to the deployment for use and value is ignored. If neither is
-  # provided, this chart will generate a secret to use instead.
-  encryption:
-    value: ""
-    secretName: ""
-
-# additional volume mounts for the TIM container.
-volumes: []
-  #  - name: volume-mount-name
-  #    path: /tmp/example
-  #    details:
-  #      emptyDir: {}
-  #  - name: another-volume-name
-  #    path: /tmp/another
-  #    details:
-  #      persistentVolumeClaim:
-  #        claimName: claim-name
-
-annotations: {}
-resources:
-  requests:
-    cpu: "100m"
-    memory: 256Mi
-  limits:
-    memory: 1Gi
-
-timBot:
-  serviceAccounts:
+installJob:
+  serviceAccount:
     rbac:
       create: true
+      clusterRoleName:
+  image:
+    nameame: "tonicai/timothy_install"
+    repo: "quay.io"
+    tag: "latest"
+    pullPolicy: null
 
-serviceAccount:
-  create: true
-  name:
+web:
+  serviceAccount:
+    create: true
+    name:
+    rbac:
+      create: true
+      
+  image:
+    name: "tonicai/timothy"
+    repo: "quay.io"
+    tag: "latest"
+    pullPolicy: null
+  annotations: {}
+  resources:
+    requests:
+      cpu: "100m"
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  # configuration for TIM
+  configuration:
+    # key value pairs that will be added directly to the deployment as
+    # environment variables
+    env: null
+      #key: value
 
-rbac:
-  create: true
-  installJobRoleName: "timothy-install-job"
+    # items in envRaw are pasted directly into the deployment in the
+    # environment section.
+    envRaw: null
 
-image:
-  webName: "tonicai/timothy"
-  installName: "tonicai/timothy_install"
-  repo: "quay.io"
-  tag: "latest"
-  pullPolicy: null
+    # Database configuration for TIM. If secretName is provided, then that is
+    # mounted for use and nothing else in this block is considered.
+    database:
+      secretName: ""
+      username: ""
+      password: ""
+      host: ""
+      port: "5432"
+      sslMode: Prefer
+      database: tim
+
+    # The encryption key used to encrypt sensitive connection information in
+    # the TIM metadata database. If secretName is provided, then that is
+    # mounted to the deployment for use and value is ignored. If neither is
+    # provided, this chart will generate a secret to use instead.
+    encryption:
+      value: ""
+      secretName: ""
+
+  # additional volume mounts for the TIM container.
+  volumes: []
+    #  - name: volume-mount-name
+    #    path: /tmp/example
+    #    details:
+    #      emptyDir: {}
+    #  - name: another-volume-name
+    #    path: /tmp/another
+    #    details:
+    #      persistentVolumeClaim:
+    #        claimName: claim-name
+  
+  #installName: "tonicai/timothy_install"
 
 networking:
   service:
@@ -99,16 +103,16 @@ networking:
     port: 8080
 
   ingress:
-    enabled: false
+    enabled: true
     className: ""
     annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts: []
-    # - host: chart-example.local
-    #   paths:
-    #     - path: /
-    #       pathType: ImplementationSpecific
+      # - host: chart-example.local
+      #   paths:
+      #     - path: /
+      #       pathType: ImplementationSpecific
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:

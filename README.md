@@ -34,12 +34,13 @@ global:
     name: tonic-quay
     value: <...>
 
-configuration:
-  database:
-    username: tim
-    password: password
-    host: db.example.com
-    database: tim
+web:
+  configuration:
+    database:
+      username: tim
+      password: password
+      host: db.example.com
+      database: tim
 ```
 
 With the above configuration, this chart will successfully install the default
@@ -77,51 +78,53 @@ before attaching to pods.
 
 | Name | Description | Default | Type |
 | ---- | ---- | ---- | ---- |
-| configuration.env | Environment variables to set directly onto the TIM pod | null | {string: string} |
-| configuration.envRaw | The contents of this block are dropped directly into the environment variables for TIM. Use this to load an environment variable from a ConfigMap or Secret | null | {string: any} |
-| configuration.database.secretName | Provide this if you have an existing kubernetes secret with the necessary fields for TIM to connect to its database | "" | string |
-| configuration.database.username | Postgres username for TIM to use | "" | string |
-| configuration.database.password | Password for postgres user | "" | string |
-| configuration.database.database | Postgres database name for TIM to use | "" | string |
-| configuration.database.host | Postgres host for TIM to connect to | "" | string |
-| configuration.database.port | Postgres port for TIM to connect to | "5432" | string |
-| configuration.database.sslMode | SSL mode to use to when connecting to the postgres instance. [See here for details](https://www.npgsql.org/doc/security.html#encryption-ssltls) | Prefer | string |
-| configuration.encryption.value | Secret key TIM uses for encryption | "" | string |
-| configuration.encryption.secretName | Existing secret to be mounted for providing the encryption key. Disregards the encryption.value | "" | string |
+| web.configuration.env | Environment variables to set directly onto the TIM pod | null | {string: string} |
+| web.configuration.envRaw | The contents of this block are dropped directly into the environment variables for TIM. Use this to load an environment variable from a ConfigMap or Secret | null | {string: any} |
+| web.configuration.database.secretName | Provide this if you have an existing kubernetes secret with the necessary fields for TIM to connect to its database | "" | string |
+| web.configuration.database.username | Postgres username for TIM to use | "" | string |
+| web.configuration.database.password | Password for postgres user | "" | string |
+| web.configuration.database.database | Postgres database name for TIM to use | "" | string |
+| web.configuration.database.host | Postgres host for TIM to connect to | "" | string |
+| web.configuration.database.port | Postgres port for TIM to connect to | "5432" | string |
+| web.configuration.database.sslMode | SSL mode to use to when connecting to the postgres instance. [See here for details](https://www.npgsql.org/doc/security.html#encryption-ssltls) | Prefer | string |
+| web.configuration.encryption.value | Secret key TIM uses for encryption | "" | string |
+| web.configuration.encryption.secretName | Existing secret to be mounted for providing the encryption key. Disregards the encryption.value | "" | string |
 
 Example:
 
 ```yaml
-configuration:
-  env:
-    SOME_ENVVAR: "value"
-  envRaw:
-    FROM_CONFIGMAP:
-      valueFrom:
-        configMapRef:
-          name: existing-config-map
-          key: specific.value
+web:
+  configuration:
+    env:
+      SOME_ENVVAR: "value"
+    envRaw:
+      FROM_CONFIGMAP:
+        valueFrom:
+          configMapRef:
+            name: existing-config-map
+            key: specific.value
 
-  database:
-    username: postgres
-    password: postgres
-    database: postgres
-    port: "5432"
-    sslMode: Require
-    host: postgres.svc
+    database:
+      username: postgres
+      password: postgres
+      database: postgres
+      port: "5432"
+      sslMode: Require
+      host: postgres.svc
 
-  encryption:
-    value: "it's a secret to everyone"
+    encryption:
+      value: "it's a secret to everyone"
 ```
 
 To provide database or encryption details from existing secrets:
 
 ```yaml
-configuration:
-  database:
-    secretName: existing-secret-db
-  encryption:
-    secretName: existing-secret-encrypt
+web:
+  configuration:
+    database:
+      secretName: existing-secret-db
+    encryption:
+      secretName: existing-secret-encrypt
 ```
 
 Providing `secretName` for either `database` or `encryption` causes this chart to
@@ -133,43 +136,49 @@ being deployed to otherwise the container will not start.
 
 | Name | Description | Default | Type |
 | ---- | ---- | ---- | ---- |
-| volumes | Volumes to mount to the TIM container | [] | Volume[] |
+| web.volumes | Volumes to mount to the TIM container | [] | Volume[] |
 
 Volumes are provided in the following format:
 
 ```yaml
-- name: Pod specific name for volume
-  path: Mount path inside the container
-  details: Specific to each mount type
+web:
+  volumes:
+    - name: Pod specific name for volume
+      path: Mount path inside the container
+      details: Specific to each mount type
 ```
 
 For example, to mount an `emptyDir` at `/var/log/tim` you would provide the
 following:
 
 ```yaml
-- name: log-mount
-  path: /var/log/tim
-  details:
-    emptyDir: {}
+web:
+  volumes:
+    - name: log-mount
+      path: /var/log/tim
+      details:
+        emptyDir: {}
 ```
 
 To mount a persistent volume Claim at `/etc/tim/example` you would provide the
 following:
 
 ```yaml
-- name: example-mount
-  path: /etc/tim/example
-  details:
-    persistentVolumeClaim:
-      claimName: my-claim
+web:
+  volumes:
+    - name: example-mount
+      path: /etc/tim/example
+      details:
+        persistentVolumeClaim:
+          claimName: my-claim
 ```
 
 ## Resources
 
 | Name | Description | Default | Type |
 | ---- | ---- | ---- | ---- |
-| resources.requests | Resource requests for TIM | { cpu: 100m, memory: 256Mi } | Kubernetes resource request |
-| resources.limits | Resource limits to impose on TIM | { memory: 1Gi } | Kubernetes resource limit |
+| web.resources.requests | Resource requests for TIM | { cpu: 100m, memory: 256Mi } | Kubernetes resource request |
+| web.resources.limits | Resource limits to impose on TIM | { memory: 1Gi } | Kubernetes resource limit |
 
 These resources are applied to the TIM container. For details on resources, [see the kubernetes documentation](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/).
 
@@ -177,21 +186,21 @@ These resources are applied to the TIM container. For details on resources, [see
 
 | Name | Description | Default | Type |
 | ---- | ---- | ---- | ---- |
-| serviceAccount.create | Controls if a service account for _TIM_ is created | true | boolean |
-| serviceAccount.rbac.create | Controls if this chart creates RBAC resources needed for _TIM_ | true | boolean |
-| timBot.serviceAccount.create | Controls if a service account for the _TIM worker_ is created | true | boolean |
-| timBot.serviceAccount.rbac.create | Controls if this chart create RBAC resources needed for the _TIM worker_ | true | boolean |
+| web.serviceAccount.create | Controls if a service account for _TIM_ is created | true | boolean |
+| web.serviceAccount.rbac.create | Controls if this chart creates RBAC resources needed for _TIM_ | true | boolean |
+| installJob.serviceAccount.rbac.create | Controls if this chart create RBAC resources needed for the _TIM worker_ | true | boolean |
+| installJob.serviceAccount.rbac.clusterRoleName | The cluster role that should be assigned to the  _TIM worker_ | "timothy-install-job" | string |
 
 For RBAC needs, consult [the TIM documentation](#rbac).
 
 ## Image
-
+These settings are found under web.image and installJob.image.
 | Name | Description | Default | Type |
 | ---- | ---- | ---- | ---- |
 | name | Image name to pull. Only set this if you are pulling an from alternative image repository that does not container the default image name. | "tonicai/timothy" | string |
 | repo | Image repository to pull from. Only set this if you are pulling from an alternative image repository not provided by Tonic | "quay.io" | string |
 | tag | Image tag to pull.  | "latest" | string |
-| pullPolicy | Pull policy specific to TIM. Overrides `global.pullPolicy` if provided | "" | string |
+| pullPolicy | Pull policy specific to TIM. Overrides `global.pullPolicy` if provided | "IfNotPresent" | string |
 
 ## Networking
 
@@ -225,6 +234,7 @@ here for readability.
 | portName | Set this to explicitly override which port the ingress will point at | "" | string |
 | annotations | Annotations to apply specifically to the ingress resource | {} | {string: string} |
 | hosts | Hosts and their paths to declare on the ingress | [] | IngressRule[] |
+| hosts.host | The domain name or IP to bind the host to.  Set to `null` to bind to all ingress | "" | string |
 | tls | TLS configuration for ingress | [] | IngressTLS[] |
 
 For details on IngressRule and IngressTLS, [consult the kubernetes
