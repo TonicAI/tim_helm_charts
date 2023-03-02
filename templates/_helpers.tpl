@@ -24,6 +24,13 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Create the role name used for install jobs
+*/}}
+{{- define "timothy.installRole" -}}
+{{- default "timothy-install-job" .Values.installJob.serviceAccount.rbac.clusterRoleName | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "timothy.chart" -}}
@@ -54,24 +61,37 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "timothy.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "timothy.fullname" .) .Values.serviceAccount.name }}
+{{- if .Values.web.serviceAccount.create }}
+{{- default (include "timothy.fullname" .) .Values.web.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" .Values.web.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
 {{/*
 Creates the fully qualified image tag needed
 */}}
-{{- define "timothy.image" -}}
-{{- $tag :=  coalesce .Values.image.tag "latest"  -}}
-{{- $repo := coalesce .Values.global.alternativeRepository .Values.image.repo "" -}}
+{{- define "timothy.webImage" -}}
+{{- $tag :=  coalesce .Values.web.image.tag "latest"  -}}
+{{- $repo := coalesce .Values.global.alternativeRepository .Values.web.image.repo "" -}}
 {{- if $repo -}}
 {{- $repo = $repo | trimSuffix "/" -}}
-{{- printf "%s/%s:%s" $repo .Values.image.name $tag -}}
+{{- printf "%s/%s:%s" $repo .Values.web.image.name $tag -}}
 {{- else -}}
-{{- printf "%s:%s" .Values.image.name $tag -}}
+{{- printf "%s:%s" .Values.web.image.name $tag -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Creates base image (without tag) needed for the install job source
+*/}}
+{{- define "timothy.installImage" -}}
+{{- $repo := coalesce .Values.global.alternativeRepository .Values.installJob.image.repo "" -}}
+{{- if $repo -}}
+{{- $repo = $repo | trimSuffix "/" -}}
+{{- printf "%s/%s" $repo .Values.installJob.image.name -}}
+{{- else -}}
+{{- printf "%s" .Values.installJob.image.name -}}
 {{- end -}}
 {{- end }}
 
@@ -133,7 +153,7 @@ Determines which nginx certificate secret we should use
 Determines which database secret we should use
 */}}
 {{- define "timothy.databaseSecretName" -}}
-{{- $externalSecret := .Values.configuration.database.secretName -}}
+{{- $externalSecret := .Values.web.configuration.database.secretName -}}
 {{- if  $externalSecret -}}
 {{ $externalSecret }}
 {{- else -}}
@@ -171,10 +191,19 @@ extensions/v1beta1
 {{- end -}}
 
 {{/*
-Determines if this chart should create rbac bindings for Tim
+Determines if this chart should create rbac bindings for Tim Web Server
 */}}
-{{- define "timothy.createRbac" -}}
-{{- if and .Values.global.rbac.create .Values.serviceAccount.create .Values.rbac.create -}}
+{{- define "timothy.createWebRbac" -}}
+{{- if and .Values.global.rbac.create .Values.web.serviceAccount.create .Values.web.serviceAccount.rbac.create -}}
+1
+{{- end -}}
+{{- end -}}
+
+{{/*
+Determines if this chart should create rbac bindings for Tim Install Job
+*/}}
+{{- define "timothy.createInstallJobRbac" -}}
+{{- if and .Values.global.rbac.create .Values.installJob.serviceAccount.rbac.create -}}
 1
 {{- end -}}
 {{- end -}}

@@ -1,4 +1,4 @@
-{{- if include "timothy.createRbac" . }}
+{{- if include "timothy.createWebRbac" . }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -9,6 +9,6 @@ roleRef:
   name: {{ include "timothy.fullname" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ include "timothy.fullname" . }}
+  name: {{ include "timothy.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 {{- end -}}

@@ -1,5 +1,5 @@
 {{- $volumes := .Values.volumes }}
-{{- $image := include "timothy.image" . }}
+{{- $image := include "timothy.webImage" . }}
 {{- $httpsEnabled := include "timothy.httpsEnabled" . }}
 {{- $httpEnabled := include "timothy.httpEnabled" . }}
 {{- if and (not $httpEnabled) (not $httpsEnabled) }}
@@ -21,7 +21,7 @@ spec:
       labels:
         {{- include "timothy.selectorLabels" . | nindent 8 }}
       annotations:
-        {{- $annotations := merge .Values.global.annotations .Values.annotations }}
+        {{- $annotations := merge .Values.global.annotations .Values.web.annotations }}
         {{- if $annotations }}
         {{- toYaml $annotations | nindent 8 }}
         {{- end }}
@@ -35,7 +35,7 @@ spec:
       initContainers:
         - name: web-ui
           image: {{ $image }}
-          imagePullPolicy: {{ coalesce .Values.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
+          imagePullPolicy: {{ coalesce .Values.web.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
           args: ["copy-frontend", "/etc/shared/nginx"]
           volumeMounts:
             - name: web-ui
@@ -43,7 +43,7 @@ spec:
       containers:
         - name: timothy
           image: {{ $image }}
-          imagePullPolicy: {{ coalesce .Values.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
+          imagePullPolicy: {{ coalesce .Values.web.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
           args: ["start"]
           {{- if $volumes }}
           volumeMounts:
@@ -53,7 +53,7 @@ spec:
             {{- end }}
           {{- end }}
           env:
-            {{- with .Values.configuration }}
+            {{- with .Values.web.configuration }}
             {{- range $key, $value := .env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
@@ -64,7 +64,7 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- with .Values.configuration.database }}
+            {{- with .Values.web.configuration.database }}
             {{- $dbValues := omit . "username" "password" "secretName" }}
             {{- range $key, $value := $dbValues }}
             - name: TIM_DB_{{ $key | upper }}
@@ -74,6 +74,12 @@ spec:
             {{- /* hardcode this last since we internally depend on knowing this port number */}}
             - name: ASPNETCORE_URLS
               value: http://localhost:5000
+            - name: INSTALL_JOB_ROLE_NAME
+              value: {{ include "timothy.installRole" . }}
+            - name: INSTALL_JOB_IMAGE_PATH
+              value: {{ include "timothy.installImage" . }}
+            - name: INSTALL_JOB_IMAGE_PULL_POLICY
+              value: {{ coalesce .Values.installJob.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
           envFrom:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}
@@ -99,7 +105,7 @@ spec:
               mountPath: "/etc/tim/certs"
               readOnly: true
             {{- end }}
-      restartPolicy: {{ coalesce .Values.global.restartPolicy .Values.restartPolicy }}
+      restartPolicy: {{ coalesce .Values.global.restartPolicy .Values.web.restartPolicy }}
       serviceAccountName: {{ include "timothy.serviceAccountName" . }}
       imagePullSecrets:
         {{- $globalPullSecrets := list -}}

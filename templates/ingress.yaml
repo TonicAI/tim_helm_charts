@@ -42,8 +42,12 @@ spec:
     {{- $portName = "https" }}
     {{- end }}
     {{- range $ingress.hosts }}
+    {{- if .host }}
     - host: {{ .host | quote }}
       http:
+    {{- else }}
+    - http:
+    {{- end }}
         paths:
           {{- range .paths }}
             - path: {{ .path }}
