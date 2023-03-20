@@ -26,6 +26,11 @@ necessary to provide based on how images are pulled into your cluster. If in
 doubt, set `global.tonicPullSecret` to the value provided to you by your Tonic
 representative.
 
+Finally, a RSA AES-256 keypair should be generated and the _PUBLIC_ key
+provided as `web.configuration.masterCert.publicKey`. The accompanying private
+key should be generated with a password that is SHA256 hashed to ensure proper
+key length. This key pair is used to provided administrative access to TIM.
+
 A minimal values would look like:
 
 ```yaml
@@ -41,6 +46,8 @@ web:
       password: password
       host: db.example.com
       database: tim
+    masterCert:
+      publicKey: "<base64>"
 ```
 
 With the above configuration, this chart will successfully install the default

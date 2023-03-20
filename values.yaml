@@ -30,7 +30,7 @@ web:
     name:
     rbac:
       create: true
-      
+
   image:
     name: "tonicai/timothy"
     repo: "quay.io"
@@ -73,6 +73,13 @@ web:
       value: ""
       secretName: ""
 
+    # Provides administrative access to TIM. The public key should come from an
+    # RSA keypair generated with AES256. If the accompanying private key is
+    # password protected, then it should be hashed with SHA256 in order to sure
+    # proper key length for AES256
+    masterCert:
+      publicKey: ""
+
   # additional volume mounts for the TIM container.
   volumes: []
     #  - name: volume-mount-name
@@ -84,7 +91,6 @@ web:
     #    details:
     #      persistentVolumeClaim:
     #        claimName: claim-name
-  
   #installName: "tonicai/timothy_install"
 
 networking:
