@@ -9,7 +9,7 @@ rules:
   verbs: ["get", "list", "create", "delete", "watch", "update", "patch"]
 - apiGroups: ["", "apps"]
   resources: ["pods", "pods/log", "deployments", "replicasets", "nodes"]
-  verbs: ["get", "list", "watch" ]
+  verbs: ["get", "list", "watch", "delete" ]
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterroles"]
   verbs: ["bind"]
