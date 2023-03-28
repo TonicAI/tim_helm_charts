@@ -207,3 +207,11 @@ Determines if this chart should create rbac bindings for Tim Install Job
 1
 {{- end -}}
 {{- end -}}
+
+{{/*
+Determine name for cert auth secret
+*/}}
+{{- define "timothy.certAuthSecretName" -}}
+{{ include "timothy.fullname" . }}-master-cert
+{{- end -}}
+
