@@ -80,6 +80,8 @@ spec:
               value: {{ include "timothy.installImage" . }}
             - name: INSTALL_JOB_IMAGE_PULL_POLICY
               value: {{ coalesce .Values.installJob.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
+            - name: PUBLIC_MASTER_CERT_SECRET
+              value: {{ include "timothy.certAuthSecretName" . }}
           envFrom:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}
