@@ -26,10 +26,23 @@ necessary to provide based on how images are pulled into your cluster. If in
 doubt, set `global.tonicPullSecret` to the value provided to you by your Tonic
 representative.
 
-Finally, a RSA AES-256 keypair should be generated and the _PUBLIC_ key
-provided as `web.configuration.masterCert.publicKey`. The accompanying private
-key should be generated with a password that is SHA256 hashed to ensure proper
-key length. This key pair is used to provided administrative access to TIM.
+Finally, a RSA keypair must be generated. The public key must be base64
+encoded, and wrapped in an 'RSA PUBLIC KEY' PEM envelope and this value base64
+encoded before being provided to `web.configuration.masterCert.publicKey`.
+Optionally, a timestamp in the pattern of `2006-01-02T15:04:05 -0700` to
+`web.configuration.masterCert.creationDate` to specify when this key pair was
+generated. If a timestamp is not provided, then the current date and time at
+installation is used even if the key pair has not been updated. Changing this
+date will cause refresh tokens to be invalidated.
+
+The accompanying private key should be encrypted with AES-256 CBC. The key for
+the AES encryption must be the SHA256 hash of a password or pass phrase. When
+encoding the private key, it must be prepended with the 16 byte IV used during
+encryption, base64 encoded and then wrapped in a 'RSA PRIVATE KEY' PEM
+envelope.
+
+This private key and its password are used to provide authentication to Timothy
+by verifying against the already stored public key.
 
 A minimal values would look like:
 
