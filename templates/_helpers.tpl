@@ -27,7 +27,11 @@ If release name contains chart name it will be used as a full name.
 Create the role name used for install jobs
 */}}
 {{- define "timothy.installRole" -}}
-{{- default "timothy-install-job" .Values.installJob.serviceAccount.rbac.clusterRoleName | trunc 63 | trimSuffix "-" }}
+{{- if .Values.installJob.serviceAccount.rbac.clusterRoleName }}
+{{- .Values.installJob.serviceAccount.rbac.clusterRoleName | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- include "timothy.fullname" . }}-install-job
+{{- end }}
 {{- end }}
 
 {{/*
