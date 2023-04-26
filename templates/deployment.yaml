@@ -111,9 +111,9 @@ spec:
             {{- end }}
           startupProbe:
             {{- if $httpsEnabled }}
-            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTPS" "port" .Values.networking.https.port "path" "/api/health") | nindent 12 }}
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTPS" "port" "https" "path" "/api/health") | nindent 12 }}
             {{- else }}
-            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTP" "port" .Values.networking.https.port "path" "/api/health") | nindent 12 }}
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTP" "port" "http" "path" "/api/health") | nindent 12 }}
             {{- end }}
       restartPolicy: {{ coalesce .Values.global.restartPolicy .Values.web.restartPolicy }}
       serviceAccountName: {{ include "timothy.serviceAccountName" . }}
