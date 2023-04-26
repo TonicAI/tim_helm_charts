@@ -86,6 +86,8 @@ spec:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}
                 optional: false
+          startupProbe:
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTP" "port" 5000 "path" "/api/health") | nindent 12 }}
         - name: nginx
           image: {{ include "timothy.globalImageRepo" . }}nginx:latest
           ports:
@@ -106,6 +108,12 @@ spec:
             - name: nginx-certificates
               mountPath: "/etc/tim/certs"
               readOnly: true
+            {{- end }}
+          startupProbe:
+            {{- if $httpsEnabled }}
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTPS" "port" "https" "path" "/api/health") | nindent 12 }}
+            {{- else }}
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTP" "port" "http" "path" "/api/health") | nindent 12 }}
             {{- end }}
       restartPolicy: {{ coalesce .Values.global.restartPolicy .Values.web.restartPolicy }}
       serviceAccountName: {{ include "timothy.serviceAccountName" . }}

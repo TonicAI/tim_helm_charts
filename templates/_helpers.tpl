@@ -219,3 +219,16 @@ Determine name for cert auth secret
 {{ include "timothy.fullname" . }}-master-cert
 {{- end -}}
 
+{{/*
+Builds an http get probe
+*/}}
+{{- define "timothy.httpGetProbe" -}}
+httpGet:
+  scheme: {{ .scheme }}
+  path: {{ .path }}
+  port: {{ .port }}
+initialDelaySeconds: {{ .initialDelay | default 5 }}
+periodSeconds: {{ .period | default 60 }}
+timeoutSeconds: {{ .timeout | default 30 }}
+failureThreshold: {{ .failureThreshold | default 5 }}
+{{- end -}}
