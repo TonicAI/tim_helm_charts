@@ -113,6 +113,12 @@ spec:
               mountPath: "/etc/tim/certs"
               readOnly: true
             {{- end }}
+          startupProbe:
+            {{- if $httpsEnabled }}
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTPS" "port" "https" "path" "/api/health") | nindent 12 }}
+            {{- else }}
+            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTP" "port" "http" "path" "/api/health") | nindent 12 }}
+            {{- end }}
         - name: vector
           image: timberio/vector:latest-alpine
           env:

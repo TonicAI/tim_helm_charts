@@ -230,3 +230,17 @@ Determine name for cert auth secret
 {{- define "timothy.vectorConfigFile" -}}
 {{ include "timothy.vectorConfigPath" . }}/vector.toml
 {{- end -}}
+
+{{/*
+Builds an http get probe
+*/}}
+{{- define "timothy.httpGetProbe" -}}
+httpGet:
+  scheme: {{ .scheme }}
+  path: {{ .path }}
+  port: {{ .port }}
+initialDelaySeconds: {{ .initialDelay | default 5 }}
+periodSeconds: {{ .period | default 60 }}
+timeoutSeconds: {{ .timeout | default 30 }}
+failureThreshold: {{ .failureThreshold | default 5 }}
+{{- end -}}
