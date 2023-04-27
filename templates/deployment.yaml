@@ -86,8 +86,6 @@ spec:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}
                 optional: false
-          startupProbe:
-            {{- include "timothy.httpGetProbe" (dict "scheme" "HTTP" "port" 5000 "path" "/api/health") | nindent 12 }}
         - name: nginx
           image: {{ include "timothy.globalImageRepo" . }}nginx:latest
           ports:
