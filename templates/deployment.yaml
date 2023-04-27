@@ -36,22 +36,26 @@ spec:
         - name: web-ui
           image: {{ $image }}
           imagePullPolicy: {{ coalesce .Values.web.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
-          args: ["copy-frontend", "/etc/shared/nginx"]
+          args: ["load-shared-files", "/etc/shared/nginx", {{ include "timothy.vectorConfigPath" . }}]
           volumeMounts:
             - name: web-ui
               mountPath: /etc/shared/nginx
+            - name: vector-configuration
+              mountPath: {{ include "timothy.vectorConfigPath" . }}
       containers:
         - name: timothy
           image: {{ $image }}
           imagePullPolicy: {{ coalesce .Values.web.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
           args: ["start"]
-          {{- if $volumes }}
           volumeMounts:
+            - name: logs-folder
+              mountPath: {{ include "timothy.vectorLogFolder" . }}
+            {{- if $volumes }}
             {{- range $volumes }}
             - name: {{ .name }}
               mountPath: {{ .path }}
             {{- end }}
-          {{- end }}
+            {{- end }}
           env:
             {{- with .Values.web.configuration }}
             {{- range $key, $value := .env }}
@@ -82,6 +86,8 @@ spec:
               value: {{ coalesce .Values.installJob.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
             - name: PUBLIC_MASTER_CERT_SECRET
               value: {{ include "timothy.certAuthSecretName" . }}
+            - name: LOG_COLLECTION_FOLDER
+              value: {{ include "timothy.vectorLogFolder" . }}
           envFrom:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}
@@ -107,6 +113,34 @@ spec:
               mountPath: "/etc/tim/certs"
               readOnly: true
             {{- end }}
+        - name: vector
+          image: timberio/vector:latest-alpine
+          env:
+            - name: VECTOR_SELF_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: VECTOR_SELF_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: VECTOR_SELF_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: LOG_COLLECTION_FOLDER
+              value: {{ include "timothy.vectorLogFolder" . }}
+          volumeMounts:
+            - name: logs-folder
+              mountPath: {{ include "timothy.vectorLogFolder" . }}
+            - name: vector-configuration
+              mountPath: {{ include "timothy.vectorConfigPath" . }}
+          args:
+            - '--config'
+            - {{ include "timothy.vectorConfigFile" . }}
       restartPolicy: {{ coalesce .Values.global.restartPolicy .Values.web.restartPolicy }}
       serviceAccountName: {{ include "timothy.serviceAccountName" . }}
       imagePullSecrets:
@@ -127,6 +161,10 @@ spec:
           configMap:
             name: {{ include "timothy.fullname" . }}-nginx-config
         - name: web-ui
+          emptyDir: {}
+        - name: vector-configuration
+          emptyDir: {}
+        - name: logs-folder
           emptyDir: {}
         {{- if $httpsEnabled }}
         - name: nginx-certificates

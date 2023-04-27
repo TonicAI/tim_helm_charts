@@ -219,3 +219,14 @@ Determine name for cert auth secret
 {{ include "timothy.fullname" . }}-master-cert
 {{- end -}}
 
+{{- define "timothy.vectorLogFolder" -}}
+/etc/shared/logs
+{{- end -}}
+
+{{- define "timothy.vectorConfigPath" -}}
+/etc/shared/vector
+{{- end -}}
+
+{{- define "timothy.vectorConfigFile" -}}
+{{ include "timothy.vectorConfigPath" . }}/vector.toml
+{{- end -}}
