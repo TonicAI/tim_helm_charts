@@ -6,8 +6,9 @@
 {{- fail "Either http or https must be enabled, both cannot be disabled" }}
 {{- end }}
 {{- $vectorLogFolder := "/etc/shared/logs" }}
-{{- $vectorConfigPath := "/etc/shared/vector" }}
+{{- $vectorConfigFolder := "/etc/shared/vector" }}
 {{- $vectorConfigFile := "/etc/shared/vector/vector.toml" }}
+{{- $frontendFolder := "/etc/shared/nginx" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,12 +40,12 @@ spec:
         - name: web-ui
           image: {{ $image }}
           imagePullPolicy: {{ coalesce .Values.web.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
-          args: ["load-shared-files", "/etc/shared/nginx", {{ $vectorConfigPath }}]
+          args: ["load-shared-files", {{ $frontendFolder }}, {{ $vectorConfigFolder }}]
           volumeMounts:
             - name: web-ui
-              mountPath: /etc/shared/nginx
+              mountPath: {{ $frontendFolder }}
             - name: vector-configuration
-              mountPath: {{ $vectorConfigPath }}
+              mountPath: {{ $vectorConfigFolder }}
       containers:
         - name: timothy
           image: {{ $image }}
@@ -146,7 +147,7 @@ spec:
             - name: logs-folder
               mountPath: {{ $vectorLogFolder }}
             - name: vector-configuration
-              mountPath: {{ $vectorConfigPath }}
+              mountPath: {{ $vectorConfigFolder }}
           args:
             - '--config'
             - {{ $vectorConfigFile }}
