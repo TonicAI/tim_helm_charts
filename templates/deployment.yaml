@@ -5,6 +5,9 @@
 {{- if and (not $httpEnabled) (not $httpsEnabled) }}
 {{- fail "Either http or https must be enabled, both cannot be disabled" }}
 {{- end }}
+{{- $vectorLogFolder := "/etc/shared/logs" }}
+{{- $vectorConfigPath := "/etc/shared/vector" }}
+{{- $vectorConfigFile := "/etc/shared/vector/vector.toml" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,12 +39,12 @@ spec:
         - name: web-ui
           image: {{ $image }}
           imagePullPolicy: {{ coalesce .Values.web.image.pullPolicy .Values.global.pullPolicy "IfNotPresent" }}
-          args: ["load-shared-files", "/etc/shared/nginx", {{ include "timothy.vectorConfigPath" . }}]
+          args: ["load-shared-files", "/etc/shared/nginx", {{ $vectorConfigPath }}]
           volumeMounts:
             - name: web-ui
               mountPath: /etc/shared/nginx
             - name: vector-configuration
-              mountPath: {{ include "timothy.vectorConfigPath" . }}
+              mountPath: {{ $vectorConfigPath }}
       containers:
         - name: timothy
           image: {{ $image }}
@@ -49,7 +52,7 @@ spec:
           args: ["start"]
           volumeMounts:
             - name: logs-folder
-              mountPath: {{ include "timothy.vectorLogFolder" . }}
+              mountPath: {{ $vectorLogFolder }}
             {{- if $volumes }}
             {{- range $volumes }}
             - name: {{ .name }}
@@ -87,7 +90,7 @@ spec:
             - name: PUBLIC_MASTER_CERT_SECRET
               value: {{ include "timothy.certAuthSecretName" . }}
             - name: LOG_COLLECTION_FOLDER
-              value: {{ include "timothy.vectorLogFolder" . }}
+              value: {{ $vectorLogFolder }}
           envFrom:
             - secretRef:
                 name: {{ include "timothy.databaseSecretName" . }}
@@ -138,15 +141,15 @@ spec:
                   apiVersion: v1
                   fieldPath: metadata.namespace
             - name: LOG_COLLECTION_FOLDER
-              value: {{ include "timothy.vectorLogFolder" . }}
+              value: {{ $vectorLogFolder }}
           volumeMounts:
             - name: logs-folder
-              mountPath: {{ include "timothy.vectorLogFolder" . }}
+              mountPath: {{ $vectorLogFolder }}
             - name: vector-configuration
-              mountPath: {{ include "timothy.vectorConfigPath" . }}
+              mountPath: {{ $vectorConfigPath }}
           args:
             - '--config'
-            - {{ include "timothy.vectorConfigFile" . }}
+            - {{ $vectorConfigFile }}
       restartPolicy: {{ coalesce .Values.global.restartPolicy .Values.web.restartPolicy }}
       serviceAccountName: {{ include "timothy.serviceAccountName" . }}
       imagePullSecrets:
