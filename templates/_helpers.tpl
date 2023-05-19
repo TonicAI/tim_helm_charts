@@ -232,3 +232,20 @@ periodSeconds: {{ .period | default 60 }}
 timeoutSeconds: {{ .timeout | default 30 }}
 failureThreshold: {{ .failureThreshold | default 5 }}
 {{- end -}}
+
+{{/*
+Builds ingress path settings
+*/}}
+{{- define "timothy.ingressPaths" -}}
+{{- $port := .port }}
+{{- $svc := .service }}
+{{- range .paths -}}
+- path: {{ .path }}
+  pathType: {{ .pathType }}
+  backend:
+    service:
+      name: {{ $svc }}
+      port:
+        name: {{ $port }}
+{{- end }}
+{{- end -}}

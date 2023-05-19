@@ -1,14 +1,16 @@
 {{- $ingress := .Values.networking.ingress -}}
 {{- if $ingress.enabled -}}
-{{- $gitVersion := $.Capabilities.KubeVersion.GitVersion }}
 {{- $httpsEnabled := include "timothy.httpsEnabled" . -}}
 {{- $httpEnabled := include "timothy.httpEnabled" . -}}
 {{- $fullName := include "timothy.fullname" . -}}
-{{- if and $ingress.className (not (semverCompare ">=1.18-0" $gitVersion)) }}
-  {{- if not (hasKey $ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set $ingress.annotations "kubernetes.io/ingress.class" $ingress.className}}
-  {{- end }}
-{{- end }}
+{{- $portName := $ingress.portName }}
+{{- if not $portName -}}
+{{- if $httpsEnabled -}}
+{{- $portName = "https" -}}
+{{- else -}}
+{{- $portName = "http" -}}
+{{- end -}}
+{{- end -}}
 apiVersion: {{ include "tonic.ingressApiVersion" . }}
 kind: Ingress
 metadata:
@@ -21,9 +23,7 @@ metadata:
         {{- toYaml $annotations | nindent 8 }}
         {{- end }}
 spec:
-  {{- if and $ingress.className (semverCompare ">=1.18-0" $gitVersion) }}
   ingressClassName: {{ $ingress.className }}
-  {{- end }}
   {{- if $ingress.tls }}
   tls:
     {{- range $ingress.tls }}
@@ -35,35 +35,12 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- $portName := "http" }}
-    {{- if $ingress.portName }}
-    {{- $portName = $ingress.portName }}
-    {{- else if not $httpEnabled }}
-    {{- $portName = "https" }}
-    {{- end }}
     {{- range $ingress.hosts }}
-    {{- if .host }}
-    - host: {{ .host | quote }}
-      http:
-    {{- else }}
     - http:
-    {{- end }}
         paths:
-          {{- range .paths }}
-            - path: {{ .path }}
-              {{- if and .pathType (semverCompare ">=1.18-0" $gitVersion) }}
-              pathType: {{ .pathType }}
-              {{- end }}
-              backend:
-                {{- if semverCompare ">=1.19-0" $gitVersion }}
-                service:
-                  name: {{ $fullName }}
-                  port:
-                    name: {{ $portName }}
-                {{- else }}
-                serviceName: {{ $fullName }}
-                servicePort: {{ $portName }}
-                {{- end }}
-          {{- end }}
+          {{- include "timothy.ingressPaths" (dict "paths" .paths "port" $portName "service" $fullName) | nindent 10 -}}
+    {{- if .host }}
+      host: {{ .host | quote }}
+    {{- end }}
     {{- end }}
 {{- end }}
