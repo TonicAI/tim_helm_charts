@@ -8,7 +8,7 @@ rules:
   resources: ["jobs", "rolebindings", "serviceaccounts", "namespaces", "secrets"]
   verbs: ["get", "list", "create", "delete", "watch", "update", "patch"]
 - apiGroups: ["", "apps"]
-  resources: ["pods", "pods/log", "deployments", "replicasets", "nodes"]
+  resources: ["pods", "pods/log", "deployments", "replicasets", "nodes", "events"]
   verbs: ["get", "list", "watch" ]
 - apiGroups: ["", "apps"]
   resources: ["pods" ]
