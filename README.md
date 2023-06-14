@@ -35,6 +35,10 @@ generated. If a timestamp is not provided, then the current date and time at
 installation is used even if the key pair has not been updated. Changing this
 date will cause refresh tokens to be invalidated.
 
+Alternatively, a secret with the fields of `public-key` and `creation-date`
+matching the above can be created and the name of the secret provided to
+`web.configuration.masterCert.secretName`.
+
 The accompanying private key should be encrypted with AES-256 CBC. The key for
 the AES encryption must be the SHA256 hash of a password or pass phrase. When
 encoding the private key, it must be prepended with the 16 byte IV used during
@@ -151,6 +155,30 @@ Providing `secretName` for either `database` or `encryption` causes this chart t
 not create its own secrets even if values are provided for that. When providing
 `secretName` ensure the secret exists within the same namespace that TIM is
 being deployed to otherwise the container will not start.
+
+## Certificate Authentication
+
+NOTE: All field names are prefixed with `web.configuration`, it is omitted here
+for readability.
+
+| Name | Description | Default | Type |
+| ---- | ----------- | ------- | ---- |
+| masterCert.publicKey | Public key to assign to TIM to use for authentication | "" | base64
+| masterCert.creationDate | Timestamp of when the public key was created | "" | Timestamp
+| masterCert.secretName | Name of externally managed secret to use for certificate authentication | "" | string
+
+These settings configure certificate authentication with TIM. TIM expects the
+generated public key to be generated with AES256, base64 encoded and wrapped in
+a `RSA PUBLIC KEY` PEM envelope. When providing the public key to this chart,
+the entire envelope must be base64 encoded. Optionally,
+`masterCert.creationDate` can be specified in the pattern of
+`2006-01-02T15:04:05 -0700`. If a timestamp is not provided, then the current
+date and time at installation is used even if the key pair has not been
+updated. Changing this date will cause refresh tokens to be invalidated.
+
+Alternatively, a secret with the fields of `public-key` and `creation-date`
+matching the above can be created and the name of the secret provided to
+`masterCert.secretName`.
 
 ## Volume
 

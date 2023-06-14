@@ -74,10 +74,20 @@ web:
       secretName: ""
 
     # Provides administrative access to TIM. The public key should come from an
-    # RSA keypair generated with AES256. If the accompanying private key is
-    # password protected, then it should be hashed with SHA256 in order to sure
+    # RSA keypair generated with AES256. The accompanying private key is
+    # password protected and it should be hashed with SHA256 in order to sure
     # proper key length for AES256
+    #
+    # Secret name allows creating and managing this secret externally from this
+    # chart. An externally created secret should have the following fields:
+    #
+    # `public-key` containing the public key portion of the certificate used
+    # for authorization
+    #
+    # `creation-date` in the pattern of `2006-01-02T15:04:05 -0700` specifying
+    # when the certificate was created
     masterCert:
+      secretName: ""
       publicKey: ""
 
   # additional volume mounts for the TIM container.
