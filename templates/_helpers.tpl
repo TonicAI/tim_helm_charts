@@ -216,11 +216,21 @@ Determines if this chart should create rbac bindings for Tim Install Job
 Determine name for cert auth secret
 */}}
 {{- define "timothy.certAuthSecretName" -}}
-{{- $secretName := .Values.web.configuration.masterCert.secretName -}}
+{{- $secretName := .Values.web.configuration.certAuth.secretName -}}
 {{- if $secretName  -}}
 {{ $secretName }}
 {{- else -}}
 {{ include "timothy.fullname" . }}-auth-public-key
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns truthy if certificate auth is externally managed
+*/}}
+{{- define "timothy.certAuthIsExternal" -}}
+{{- $secretName := .Values.web.configuration.certAuth.secretName -}}
+{{- if $secretName -}}
+1
 {{- end -}}
 {{- end -}}
 
