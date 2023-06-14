@@ -28,12 +28,16 @@ representative.
 
 Finally, a RSA keypair must be generated. The public key must be base64
 encoded, and wrapped in an 'RSA PUBLIC KEY' PEM envelope and this value base64
-encoded before being provided to `web.configuration.masterCert.publicKey`.
+encoded before being provided to `web.configuration.certAuth.publicKey`.
 Optionally, a timestamp in the pattern of `2006-01-02T15:04:05 -0700` to
-`web.configuration.masterCert.creationDate` to specify when this key pair was
+`web.configuration.certAuth.creationDate` to specify when this key pair was
 generated. If a timestamp is not provided, then the current date and time at
 installation is used even if the key pair has not been updated. Changing this
 date will cause refresh tokens to be invalidated.
+
+Alternatively, a secret with the fields of `public-key` and `creation-date`
+matching the above can be created and the name of the secret provided to
+`web.configuration.certAuth.secretName`.
 
 The accompanying private key should be encrypted with AES-256 CBC. The key for
 the AES encryption must be the SHA256 hash of a password or pass phrase. When
@@ -59,7 +63,7 @@ web:
       password: password
       host: db.example.com
       database: tim
-    masterCert:
+    certAuth:
       publicKey: "<base64>"
 ```
 
@@ -151,6 +155,30 @@ Providing `secretName` for either `database` or `encryption` causes this chart t
 not create its own secrets even if values are provided for that. When providing
 `secretName` ensure the secret exists within the same namespace that TIM is
 being deployed to otherwise the container will not start.
+
+## Certificate Authentication
+
+NOTE: All field names are prefixed with `web.configuration`, it is omitted here
+for readability.
+
+| Name | Description | Default | Type |
+| ---- | ----------- | ------- | ---- |
+| certAuth.publicKey | Public key to assign to TIM to use for authentication | "" | base64
+| certAuth.creationDate | Timestamp of when the public key was created | "" | Timestamp
+| certAuth.secretName | Name of externally managed secret to use for certificate authentication | "" | string
+
+These settings configure certificate authentication with TIM. TIM expects the
+generated public key to be generated with AES256, base64 encoded and wrapped in
+a `RSA PUBLIC KEY` PEM envelope. When providing the public key to this chart,
+the entire envelope must be base64 encoded. Optionally,
+`certAuth.creationDate` can be specified in the pattern of
+`2006-01-02T15:04:05 -0700`. If a timestamp is not provided, then the current
+date and time at installation is used even if the key pair has not been
+updated. Changing this date will cause refresh tokens to be invalidated.
+
+Alternatively, a secret with the fields of `public-key` and `creation-date`
+matching the above can be created and the name of the secret provided to
+`certAuth.secretName`.
 
 ## Volume
 
